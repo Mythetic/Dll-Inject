@@ -22,4 +22,27 @@
    hThread = CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)dwLoadAddr, lpAllocAddr, 0, NULL);
    
   
-  这样就可以实现DLL文件的注射。
+  这样就可以实现DLL文件的注射。若要实现一些猥琐的功能，可以借助DllMain函数，当调用DLL时，会返回DLL_PROCESS_ATTACH状态，这时新建一个线程完成猥琐的事情。如下：
+  
+DWORD WINAPI ThreadProc(LPVOID lpParameter)
+{
+	for(;;)
+	{
+		Sleep(1000);
+		printf("TestDll 中的代码在执行....\n");
+	}
+	return 0;
+}
+BOOL APIENTRY DllMain( HANDLE hModule, 
+                       DWORD  ul_reason_for_call, 
+                       LPVOID lpReserved)
+{
+	switch (ul_reason_for_call)
+	{
+	case DLL_PROCESS_ATTACH:
+		  CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)ThreadProc,NULL,0,NULL);
+	......	
+	}
+    	return TRUE;
+}
+
